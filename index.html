@@ -3,10 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalogue conciergerie FEAT</title>
+    <title>Catalogue Conciergerie FEAT</title>
+    <!-- Ajouter la bibliothèque PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>
+    <style>
+        #pdf-viewer {
+            width: 100%;
+            height: 100vh; /* Pour occuper toute la hauteur de l'écran */
+            overflow: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Consulter Catalogue de la conciergerie FEAT </h1>
-    <iframe src="https://featcity2.github.io/catalogue-conciergerie/catalogue-conciergerie-city2.pdf" width="100%" height="600px"></iframe>
+    <h1>Consulter Catalogue de la Conciergerie FEAT</h1>
+    <div id="pdf-viewer"></div>
+
+    <script>
+        // URL du fichier PDF
+        var url = 'https://featcity2.github.io/catalogue-conciergerie/catalogue-conciergerie-city2.pdf';
+        
+        // Chargement du PDF
+        pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
+            var pdfDoc = pdfDoc_;
+            var viewer = document.getElementById('pdf-viewer');
+
+            // Fonction pour afficher chaque page
+            function renderPage(pageNum) {
+                pdfDoc.getPage(pageNum).then(function (page) {
+                    var scale = 1.5;
+                    var viewport = page.getViewport({ scale: scale });
+                    
+                    // Crée un canvas pour chaque page
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    viewer.appendChild(canvas);
+                    
+                    // Rendu de la page sur le canvas
+                    page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    });
+                });
+            }
+
+            // Affichage de toutes les pages
+            for (var pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+                renderPage(pageNum);
+            }
+        });
+    </script>
 </body>
 </html>
