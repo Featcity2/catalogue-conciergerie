@@ -26,7 +26,7 @@
             background-color: white;
         }
 
-        /* Contrôles de navigation (précédent/suivant) */
+        /* Contrôles de navigation */
         .nav-controls {
             position: fixed;
             bottom: 20px;
@@ -94,7 +94,7 @@
         var pdfDoc = null;  // Document PDF
         var viewer = document.getElementById('pdf-viewer');
         var navControls = document.querySelector('.nav-controls');
-        var scale = 1.0; // Taille du zoom initiale
+        var scale = 0.8; // Taille du zoom initiale ajustée pour mieux s'adapter à l'écran
 
         // Chargement du PDF avec PDF.js
         pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
@@ -120,8 +120,9 @@
                     viewport: viewport
                 });
 
-                // Afficher les boutons de navigation
+                // Afficher les boutons de navigation au clic tactile
                 navControls.style.opacity = 1;
+                resetNavControls(); // Réinitialiser la disparition des boutons
             });
         }
 
@@ -142,11 +143,17 @@
             }
         });
 
-        // Cacher les boutons de navigation après un certain délai
+        // Fonction pour cacher les boutons de navigation après l'interaction
         function hideNavControls() {
             setTimeout(function() {
                 navControls.style.opacity = 0;
-            }, 1000); // Les boutons disparaissent après 1 seconde
+            }, 2000); // Les boutons disparaissent après 2 secondes d'inactivité
+        }
+
+        // Fonction pour réinitialiser l'affichage des boutons dès l'interaction tactile
+        function resetNavControls() {
+            clearTimeout();
+            navControls.style.opacity = 1;
         }
 
         // Gérer le zoom (seulement zoom avant et arrière, pas de zoom tactile)
@@ -157,6 +164,12 @@
                 scale -= 0.1; // Zoom arrière
             }
             renderPage(currentPage); // Re-render la page avec le nouveau zoom
+        });
+
+        // Réinitialiser les boutons de navigation après l'action tactile
+        viewer.addEventListener('touchstart', function() {
+            navControls.style.opacity = 1;
+            hideNavControls(); // Cacher après 2 secondes d'inactivité
         });
     </script>
 </body>
