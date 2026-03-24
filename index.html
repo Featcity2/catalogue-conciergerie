@@ -18,7 +18,7 @@
         /* Conteneur du PDF */
         #pdf-viewer {
             width: 100%;
-            height: calc(100vh - 120px); /* Hauteur ajustée pour les boutons de navigation */
+            height: calc(100vh - 120px); /* Ajuste la hauteur pour les boutons */
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -26,7 +26,7 @@
             background-color: white;
         }
 
-        /* Contrôles de navigation */
+        /* Contrôles de navigation (précédent/suivant) */
         .nav-controls {
             position: fixed;
             bottom: 20px;
@@ -39,6 +39,8 @@
             display: flex;
             justify-content: space-between;
             width: 150px;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
         }
 
         .nav-button {
@@ -87,11 +89,12 @@
     </div>
 
     <script>
-        // URL du fichier PDF
         var url = 'https://featcity2.github.io/catalogue-conciergerie/catalogue-conciergerie-city2.pdf';
         var currentPage = 1; // Page courante
         var pdfDoc = null;  // Document PDF
         var viewer = document.getElementById('pdf-viewer');
+        var navControls = document.querySelector('.nav-controls');
+        var scale = 1.0; // Taille du zoom initiale
 
         // Chargement du PDF avec PDF.js
         pdfjsLib.getDocument(url).promise.then(function(pdfDoc_) {
@@ -102,8 +105,7 @@
         // Fonction pour afficher une page
         function renderPage(pageNum) {
             pdfDoc.getPage(pageNum).then(function(page) {
-                var scale = window.innerWidth < 800 ? 0.75 : 1.0;  // Ajuster le zoom en fonction de la taille de l'écran
-                var viewport = page.getViewport({ scale: scale }); // Ajuster l'échelle du PDF
+                var viewport = page.getViewport({ scale: scale });
                 var canvas = document.createElement('canvas');
                 var context = canvas.getContext('2d');
                 canvas.height = viewport.height;
@@ -117,6 +119,9 @@
                     canvasContext: context,
                     viewport: viewport
                 });
+
+                // Afficher les boutons de navigation
+                navControls.style.opacity = 1;
             });
         }
 
@@ -125,6 +130,7 @@
             if (currentPage < pdfDoc.numPages) {
                 currentPage++;
                 renderPage(currentPage);
+                hideNavControls(); // Cacher les boutons après l'action
             }
         });
 
@@ -132,7 +138,25 @@
             if (currentPage > 1) {
                 currentPage--;
                 renderPage(currentPage);
+                hideNavControls(); // Cacher les boutons après l'action
             }
+        });
+
+        // Cacher les boutons de navigation après un certain délai
+        function hideNavControls() {
+            setTimeout(function() {
+                navControls.style.opacity = 0;
+            }, 1000); // Les boutons disparaissent après 1 seconde
+        }
+
+        // Gérer le zoom (seulement zoom avant et arrière, pas de zoom tactile)
+        document.addEventListener('wheel', function(event) {
+            if (event.deltaY < 0 && scale < 2) {
+                scale += 0.1; // Zoom avant
+            } else if (event.deltaY > 0 && scale > 0.5) {
+                scale -= 0.1; // Zoom arrière
+            }
+            renderPage(currentPage); // Re-render la page avec le nouveau zoom
         });
     </script>
 </body>
