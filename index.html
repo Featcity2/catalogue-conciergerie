@@ -7,7 +7,6 @@
     <!-- Ajouter la bibliothèque PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.8.335/pdf.min.js"></script>
     <style>
-        /* Style général de la page */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -15,16 +14,17 @@
             text-align: center;
         }
 
-        /* Conteneur pour le PDF */
+        /* Conteneur du PDF */
         #pdf-viewer {
             width: 100%;
-            height: calc(100vh - 60px); /* Ajuste la taille pour l'écran */
-            overflow: auto;
-            margin: 0;
-            padding: 0;
+            height: calc(100vh - 60px); /* Ajuste la hauteur pour ne pas couvrir les boutons */
+            overflow: hidden; /* Empêche les débordements horizontaux */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Contrôles de zoom */
         .zoom-controls {
             position: fixed;
             top: 10px;
@@ -83,14 +83,16 @@
     </div>
 
     <script>
+        // URL du fichier PDF
         var url = 'https://featcity2.github.io/catalogue-conciergerie/catalogue-conciergerie-city2.pdf';
-        var currentScale = 1.0; // Valeur initiale du zoom
+        var currentScale = 0.8; // Valeur initiale du zoom (plus petite pour un meilleur ajustement à l'écran)
+        var viewer = document.getElementById('pdf-viewer');
 
+        // Chargement du PDF avec PDF.js
         pdfjsLib.getDocument(url).promise.then(function (pdfDoc_) {
             var pdfDoc = pdfDoc_;
-            var viewer = document.getElementById('pdf-viewer');
 
-            // Fonction pour afficher chaque page
+            // Fonction pour afficher chaque page du PDF
             function renderPage(pageNum) {
                 pdfDoc.getPage(pageNum).then(function (page) {
                     var viewport = page.getViewport({ scale: currentScale });
@@ -108,7 +110,7 @@
                 });
             }
 
-            // Affichage de toutes les pages
+            // Afficher toutes les pages du PDF
             function renderAllPages() {
                 viewer.innerHTML = ''; // Efface les pages précédentes
                 for (var pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
@@ -126,7 +128,7 @@
 
             // Zoom Out
             document.getElementById('zoom-out').addEventListener('click', function () {
-                if (currentScale > 0.3) { // Empêche de trop réduire
+                if (currentScale > 0.3) { // Empêche le zoom trop petit
                     currentScale -= 0.1; // Diminue le zoom de 10%
                     renderAllPages();
                 }
